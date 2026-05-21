@@ -9,7 +9,7 @@ import {
   ScrollView,
   Animated,
 } from 'react-native';
-import Svg, { Circle, Defs, RadialGradient, Stop, Filter, FeGaussianBlur, FeMerge, FeMergeNode } from 'react-native-svg';
+import Svg, { Circle } from 'react-native-svg';
 import {
   Chip,
   Button,
@@ -43,32 +43,16 @@ function priorityColor(p?: string) {
 }
 
 function ZoneLogo({ colors }: { colors: AppColors }) {
-  const isDark = colors.background === '#0f0f0f';
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-      <Svg width={28} height={28} viewBox="0 0 120 120">
-        <Defs>
-          <RadialGradient id="zbg" cx="50%" cy="35%" r="70%">
-            <Stop offset="0%" stopColor="#1e1b4b" />
-            <Stop offset="100%" stopColor="#0f0f0f" />
-          </RadialGradient>
-          <Filter id="zglow">
-            <FeGaussianBlur stdDeviation="2.5" result="blur" />
-            <FeMerge>
-              <FeMergeNode in="blur" />
-              <FeMergeNode in="SourceGraphic" />
-            </FeMerge>
-          </Filter>
-        </Defs>
-        <Circle cx="60" cy="60" r="60" fill="url(#zbg)" />
-        <Circle cx="60" cy="60" r="40" fill="#4f46e5" fillOpacity={0.06} />
-        <Circle cx="60" cy="60" r="50" fill="none" stroke="#4f46e5" strokeOpacity={0.25} strokeWidth={4.5} />
-        <Circle cx="60" cy="60" r="36" fill="none" stroke="#6366f1" strokeOpacity={0.55} strokeWidth={5} />
-        <Circle cx="60" cy="60" r="22" fill="none" stroke="#818cf8" strokeWidth={5.5} />
-        <Circle cx="60" cy="60" r="7" fill="#818cf8" />
-        <Circle cx="60" cy="60" r="4" fill="white" fillOpacity={0.95} />
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+      {/* Transparent background — rings use primary color, adapts to light/dark */}
+      <Svg width={26} height={26} viewBox="0 0 120 120">
+        <Circle cx="60" cy="60" r="50" fill="none" stroke={colors.primary} strokeOpacity={0.2} strokeWidth={7} />
+        <Circle cx="60" cy="60" r="36" fill="none" stroke={colors.primary} strokeOpacity={0.5} strokeWidth={7} />
+        <Circle cx="60" cy="60" r="22" fill="none" stroke={colors.primary} strokeWidth={7} />
+        <Circle cx="60" cy="60" r="7" fill={colors.primary} />
       </Svg>
-      <Text style={{ fontSize: 20, fontWeight: '800', color: colors.primary, letterSpacing: -0.5 }}>
+      <Text style={{ fontSize: 19, fontWeight: '800', color: colors.text, letterSpacing: -0.4 }}>
         Zone
       </Text>
     </View>
@@ -79,30 +63,36 @@ function ThemeToggle({ theme, toggleTheme, colors }: { theme: string; toggleThem
   const anim = useRef(new Animated.Value(theme === 'dark' ? 1 : 0)).current;
 
   useEffect(() => {
-    Animated.spring(anim, { toValue: theme === 'dark' ? 1 : 0, tension: 120, friction: 10, useNativeDriver: false }).start();
+    Animated.spring(anim, { toValue: theme === 'dark' ? 1 : 0, tension: 100, friction: 12, useNativeDriver: false }).start();
   }, [theme]);
 
-  const translateX = anim.interpolate({ inputRange: [0, 1], outputRange: [2, 28] });
-  const trackColor = anim.interpolate({ inputRange: [0, 1], outputRange: [colors.toggleTrack, '#3a3a5c'] });
+  // Thumb slides from left (light) to right (dark)
+  const translateX = anim.interpolate({ inputRange: [0, 1], outputRange: [2, 24] });
+  const trackBg    = anim.interpolate({ inputRange: [0, 1], outputRange: ['#e2e2e2', '#3730a3'] });
 
   return (
-    <TouchableOpacity onPress={toggleTheme} activeOpacity={0.85} style={{ marginRight: 8 }}>
-      <Animated.View style={{ width: 54, height: 28, borderRadius: 14, backgroundColor: trackColor, justifyContent: 'center' }}>
-        {/* Sun icon — left side */}
-        <Icon source="white-balance-sunny" size={13} color={theme === 'light' ? '#f59e0b' : colors.textDisabled}
-          style={{ position: 'absolute', left: 7 } as any} />
-        {/* Moon icon — right side */}
-        <Icon source="moon-waning-crescent" size={13} color={theme === 'dark' ? '#a5b4fc' : colors.textDisabled}
-          style={{ position: 'absolute', right: 7 } as any} />
-        {/* Sliding thumb */}
+    <TouchableOpacity onPress={toggleTheme} activeOpacity={0.8}
+      style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginRight: 4 }}>
+      {/* Sun */}
+      <Icon source="white-balance-sunny" size={14} color={theme === 'light' ? '#f59e0b' : colors.textDisabled} />
+      {/* Track */}
+      <Animated.View style={{
+        width: 46, height: 26, borderRadius: 13,
+        backgroundColor: trackBg,
+        justifyContent: 'center',
+        borderWidth: theme === 'light' ? 1 : 0,
+        borderColor: '#d1d5db',
+      }}>
         <Animated.View style={{
-          width: 22, height: 22, borderRadius: 11,
-          backgroundColor: colors.toggleThumb,
+          width: 20, height: 20, borderRadius: 10,
+          backgroundColor: theme === 'light' ? '#ffffff' : colors.primary,
           transform: [{ translateX }],
-          shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 3, shadowOffset: { width: 0, height: 1 },
-          elevation: 2,
+          shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 3,
+          shadowOffset: { width: 0, height: 1 }, elevation: 3,
         }} />
       </Animated.View>
+      {/* Moon */}
+      <Icon source="moon-waning-crescent" size={14} color={theme === 'dark' ? '#a5b4fc' : colors.textDisabled} />
     </TouchableOpacity>
   );
 }
