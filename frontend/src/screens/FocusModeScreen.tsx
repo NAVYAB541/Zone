@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { View, Text, StyleSheet, Alert, Modal } from 'react-native';
+import {
+  View, Text, StyleSheet, Alert, Modal,
+  Keyboard, KeyboardAvoidingView, Platform, Pressable,
+} from 'react-native';
 import { Button, Surface, Icon, TouchableRipple, TextInput } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';
@@ -185,7 +188,13 @@ export default function FocusModeScreen({ navigation, route }: Props) {
 
       {/* Step 3 — Update next action (only when "Not yet") */}
       <Modal visible={modalStep === 'next-action'} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+        >
+          {/* Backdrop — tap anywhere above the card to dismiss keyboard */}
+          <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' }} onPress={Keyboard.dismiss} />
+          {/* Card — sibling of backdrop so taps here don't trigger backdrop */}
           <Surface style={modalStyles.modalCard} elevation={4}>
             <View style={{ alignSelf: 'center', marginBottom: 12 }}>
               <Icon source="arrow-right-circle-outline" size={44} color={COLORS.primary} />
@@ -202,6 +211,9 @@ export default function FocusModeScreen({ navigation, route }: Props) {
               style={modalStyles.nextActionInput}
               backgroundColor={colors.surface}
               multiline
+              blurOnSubmit
+              returnKeyType="done"
+              onSubmitEditing={Keyboard.dismiss}
             />
             <Button
               mode="contained"
@@ -222,7 +234,7 @@ export default function FocusModeScreen({ navigation, route }: Props) {
               Skip
             </Button>
           </Surface>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Step 2 — Task completion */}

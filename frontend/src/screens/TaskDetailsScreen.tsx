@@ -134,7 +134,7 @@ export default function TaskDetailsScreen({ navigation, route }: Props) {
   const doneCount = subtasks.filter(s => s.completed).length;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
 
       <TextInput label="Title" value={title} onChangeText={setTitle}
         mode="outlined" style={styles.input} outlineColor={colors.border} activeOutlineColor={COLORS.primary}
