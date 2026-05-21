@@ -198,13 +198,81 @@ export default function TaskListScreen({
 
   useFocusEffect(useCallback(() => { loadTasks(); }, [filter, sortBy, categoryFilter, tagFilter]));
 
-  const toggleTask = async (task: Task) => {
+  // Cascade-completes all subtasks then the parent in parallel
+  const cascadeComplete = async (parent: Task, subs: Task[]) => {
     try {
+      const incomplete = subs.filter(s => !s.completed);
+      await Promise.all(
+        incomplete.map(s =>
+          fetch(`${API_URL}/${s.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...s, completed: true }),
+          })
+        )
+      );
+      await fetch(`${API_URL}/${parent.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...parent, completed: true }),
+      });
+      loadTasks();
+    } catch { Alert.alert('Error', 'Could not complete all tasks'); }
+  };
+
+  const toggleTask = async (task: Task) => {
+    const subs = subtasksByParent[task.id] ?? [];
+    const isParentWithSubs = !task.parentTaskId && subs.length > 0;
+
+    // Tapping an incomplete parent that has subtasks → confirm cascade
+    if (isParentWithSubs && !task.completed) {
+      Alert.alert(
+        'Mark all as done?',
+        `"${task.title}" has ${subs.length} subtask${subs.length === 1 ? '' : 's'}. Complete them all?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Mark All Done', onPress: () => cascadeComplete(task, subs) },
+        ]
+      );
+      return;
+    }
+
+    try {
+      const newCompleted = !task.completed;
       await fetch(`${API_URL}/${task.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...task, completed: !task.completed }),
+        body: JSON.stringify({ ...task, completed: newCompleted }),
       });
+
+      // Keep parent in sync when a subtask changes
+      if (task.parentTaskId) {
+        const parent = allTopLevel.find(t => t.id === task.parentTaskId);
+        if (parent) {
+          if (newCompleted) {
+            // Just completed a subtask — auto-complete parent if all siblings are now done
+            const siblings = subtasksByParent[task.parentTaskId] ?? [];
+            const allWillBeDone = siblings.every(s => s.id === task.id || s.completed);
+            if (allWillBeDone && !parent.completed) {
+              await fetch(`${API_URL}/${parent.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...parent, completed: true }),
+              });
+            }
+          } else {
+            // Un-completed a subtask — if parent was complete, un-complete it too
+            if (parent.completed) {
+              await fetch(`${API_URL}/${parent.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...parent, completed: false }),
+              });
+            }
+          }
+        }
+      }
+
       loadTasks();
     } catch { Alert.alert('Error', 'Could not update task'); }
   };
