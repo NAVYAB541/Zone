@@ -9,6 +9,7 @@ import LaunchMeScreen from './src/screens/LaunchMeScreen';
 import FocusModeScreen from './src/screens/FocusModeScreen';
 import AIPlannerScreen from './src/screens/AIPlannerScreen';
 import AboutScreen from './src/screens/AboutScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
 import { RootStackParamList } from './src/types';
 import { requestNotificationPermission } from './src/utils/notifications';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
@@ -40,6 +41,7 @@ function ThemedApp() {
           <Stack.Screen name="FocusMode"   component={FocusModeScreen}   options={{ title: 'Focus Mode', headerShown: false }} />
           <Stack.Screen name="AIPlanner"   component={AIPlannerScreen}   options={{ title: 'Plan with AI' }} />
           <Stack.Screen name="About"       component={AboutScreen}       options={{ title: '' }} />
+          <Stack.Screen name="Settings"    component={SettingsScreen}    options={{ title: 'Settings' }} />
         </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>

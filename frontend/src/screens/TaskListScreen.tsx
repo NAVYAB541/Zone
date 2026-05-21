@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useLayoutEffect, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Alert,
   ScrollView,
-  Animated,
 } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import {
@@ -45,57 +44,19 @@ function priorityColor(p?: string) {
 function ZoneLogo({ colors }: { colors: AppColors }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
-      {/* Transparent background — rings use primary color, adapts to light/dark */}
       <Svg width={26} height={26} viewBox="0 0 120 120">
         <Circle cx="60" cy="60" r="50" fill="none" stroke={colors.primary} strokeOpacity={0.2} strokeWidth={7} />
         <Circle cx="60" cy="60" r="36" fill="none" stroke={colors.primary} strokeOpacity={0.5} strokeWidth={7} />
         <Circle cx="60" cy="60" r="22" fill="none" stroke={colors.primary} strokeWidth={7} />
         <Circle cx="60" cy="60" r="7" fill={colors.primary} />
       </Svg>
-      <Text style={{ fontSize: 19, fontWeight: '800', color: colors.text, letterSpacing: -0.4 }}>
+      <Text style={{ fontSize: 19, fontWeight: '800', color: colors.primary, letterSpacing: -0.4 }}>
         Zone
       </Text>
     </View>
   );
 }
 
-function ThemeToggle({ theme, toggleTheme, colors }: { theme: string; toggleTheme: () => void; colors: AppColors }) {
-  const anim = useRef(new Animated.Value(theme === 'dark' ? 1 : 0)).current;
-
-  useEffect(() => {
-    Animated.spring(anim, { toValue: theme === 'dark' ? 1 : 0, tension: 100, friction: 12, useNativeDriver: false }).start();
-  }, [theme]);
-
-  // Thumb slides from left (light) to right (dark)
-  const translateX = anim.interpolate({ inputRange: [0, 1], outputRange: [2, 24] });
-  const trackBg    = anim.interpolate({ inputRange: [0, 1], outputRange: ['#e2e2e2', '#3730a3'] });
-
-  return (
-    <TouchableOpacity onPress={toggleTheme} activeOpacity={0.8}
-      style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginRight: 4 }}>
-      {/* Sun */}
-      <Icon source="white-balance-sunny" size={14} color={theme === 'light' ? '#f59e0b' : colors.textDisabled} />
-      {/* Track */}
-      <Animated.View style={{
-        width: 46, height: 26, borderRadius: 13,
-        backgroundColor: trackBg,
-        justifyContent: 'center',
-        borderWidth: theme === 'light' ? 1 : 0,
-        borderColor: '#d1d5db',
-      }}>
-        <Animated.View style={{
-          width: 20, height: 20, borderRadius: 10,
-          backgroundColor: theme === 'light' ? '#ffffff' : colors.primary,
-          transform: [{ translateX }],
-          shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 3,
-          shadowOffset: { width: 0, height: 1 }, elevation: 3,
-        }} />
-      </Animated.View>
-      {/* Moon */}
-      <Icon source="moon-waning-crescent" size={14} color={theme === 'dark' ? '#a5b4fc' : colors.textDisabled} />
-    </TouchableOpacity>
-  );
-}
 
 function ProductivityBadge({ score, colors }: { score: number; colors: AppColors }) {
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -128,7 +89,7 @@ const SORT_OPTIONS: { label: string; value: 'priority' | 'dueDate' | 'title'; ic
 export default function TaskListScreen({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, 'TaskList'>) {
-  const { colors, theme, toggleTheme } = useTheme();
+  const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -148,32 +109,30 @@ export default function TaskListScreen({
       headerTitle: () => <ZoneLogo colors={colors} />,
       headerTitleAlign: 'center',
       headerLeft: () => (
-        <TouchableOpacity
+        <IconButton
+          icon="information-outline"
+          size={24}
+          iconColor={colors.textSecondary}
           onPress={() => navigation.navigate('About')}
-          activeOpacity={0.7}
+          style={{ marginLeft: 4 }}
           accessibilityLabel="About Zone"
           accessibilityRole="button"
           accessibilityHint="Opens app info and features"
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: 12,
-            backgroundColor: colors.surfaceVariant,
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginLeft: 8,
-          }}
-        >
-          <Icon source="information-outline" size={24} color={colors.textSecondary} />
-        </TouchableOpacity>
+        />
       ),
       headerRight: () => (
-        <View style={{ marginRight: 8 }}>
-          <ThemeToggle theme={theme} toggleTheme={toggleTheme} colors={colors} />
-        </View>
+        <IconButton
+          icon="cog-outline"
+          size={24}
+          iconColor={colors.textSecondary}
+          onPress={() => navigation.navigate('Settings')}
+          style={{ marginRight: 4 }}
+          accessibilityLabel="Settings"
+          accessibilityRole="button"
+        />
       ),
     });
-  }, [theme, colors]);
+  }, [colors]);
 
   const toggleExpanded = (id: string) => {
     setExpandedTasks(prev => {

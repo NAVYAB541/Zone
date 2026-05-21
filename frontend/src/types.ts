@@ -42,4 +42,5 @@ export type RootStackParamList = {
     existingTaskId?: string;
   };
   About: undefined;
+  Settings: undefined;
 };

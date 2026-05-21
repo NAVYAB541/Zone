@@ -67,6 +67,7 @@ interface ThemeContextType {
   colors: AppColors;
   paperTheme: typeof lightPaperTheme;
   toggleTheme: () => void;
+  setTheme: (t: ThemeType) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -88,11 +89,16 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
   };
 
+  const applyTheme = (t: ThemeType) => {
+    setTheme(t);
+    AsyncStorage.setItem(THEME_KEY, t);
+  };
+
   const colors      = theme === 'light' ? lightColors : darkColors;
   const paperTheme  = theme === 'light' ? lightPaperTheme : darkPaperTheme;
 
   return (
-    <ThemeContext.Provider value={{ theme, colors, paperTheme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, colors, paperTheme, toggleTheme, setTheme: applyTheme }}>
       {children}
     </ThemeContext.Provider>
   );
