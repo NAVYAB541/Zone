@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { Appearance } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
 
@@ -73,7 +74,11 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useState<ThemeType>('light');
+  // Initialize from device color scheme synchronously so first render is correct.
+  // AsyncStorage then overrides with the user's explicit saved preference.
+  const [theme, setTheme] = useState<ThemeType>(
+    () => Appearance.getColorScheme() === 'dark' ? 'dark' : 'light'
+  );
 
   useEffect(() => {
     AsyncStorage.getItem(THEME_KEY).then(saved => {

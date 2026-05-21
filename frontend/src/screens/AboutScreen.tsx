@@ -34,8 +34,12 @@ const FEATURES = [
 ];
 
 export default function AboutScreen() {
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
   const styles = makeStyles(colors);
+
+  const badgeBg   = theme === 'dark' ? 'rgba(99,102,241,0.15)' : '#1e1b4b';
+  const ringColor = theme === 'dark' ? colors.primary : '#a5b4fc';
+  const dotColor  = theme === 'dark' ? colors.primary : '#c4b5fd';
 
   return (
     <ScrollView
@@ -45,12 +49,12 @@ export default function AboutScreen() {
     >
       {/* ── Logo + name ── */}
       <View style={styles.hero}>
-        <View style={styles.iconWrap}>
+        <View style={[styles.iconWrap, { backgroundColor: badgeBg }]}>
           <Svg width={80} height={80} viewBox="0 0 120 120">
-            <Circle cx="60" cy="60" r="50" fill="none" stroke={colors.primary} strokeOpacity={0.15} strokeWidth={6} />
-            <Circle cx="60" cy="60" r="36" fill="none" stroke={colors.primary} strokeOpacity={0.4} strokeWidth={6} />
-            <Circle cx="60" cy="60" r="22" fill="none" stroke={colors.primary} strokeWidth={6} />
-            <Circle cx="60" cy="60" r="7" fill={colors.primary} />
+            <Circle cx="60" cy="60" r="50" fill="none" stroke={ringColor} strokeOpacity={0.3} strokeWidth={8} />
+            <Circle cx="60" cy="60" r="36" fill="none" stroke={ringColor} strokeOpacity={0.6} strokeWidth={8} />
+            <Circle cx="60" cy="60" r="22" fill="none" stroke={ringColor} strokeWidth={8} />
+            <Circle cx="60" cy="60" r="7"  fill={dotColor} />
           </Svg>
         </View>
 
@@ -126,7 +130,6 @@ function makeStyles(colors: ReturnType<typeof import('../context/ThemeContext').
       width: 100,
       height: 100,
       borderRadius: 28,
-      backgroundColor: colors.surfaceVariant,
       alignItems: 'center',
       justifyContent: 'center',
       marginBottom: 20,

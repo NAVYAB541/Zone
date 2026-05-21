@@ -123,12 +123,12 @@ export default function TaskListScreen({
       headerLeft: () => (
         <TouchableOpacity
           onPress={() => navigation.navigate('About')}
-          activeOpacity={0.6}
+          activeOpacity={0.5}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           accessibilityLabel="About Zone"
           accessibilityRole="button"
           accessibilityHint="Opens app info and features"
-          style={{ marginLeft: 14 }}
+          style={{ marginLeft: 14, backgroundColor: 'transparent' }}
         >
           <Icon source="information-outline" size={24} color={colors.textSecondary} />
         </TouchableOpacity>
@@ -136,11 +136,11 @@ export default function TaskListScreen({
       headerRight: () => (
         <TouchableOpacity
           onPress={() => navigation.navigate('Settings')}
-          activeOpacity={0.6}
+          activeOpacity={0.5}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           accessibilityLabel="Settings"
           accessibilityRole="button"
-          style={{ marginRight: 14 }}
+          style={{ marginRight: 14, backgroundColor: 'transparent' }}
         >
           <Icon source="cog-outline" size={24} color={colors.textSecondary} />
         </TouchableOpacity>
