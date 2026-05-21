@@ -146,16 +146,30 @@ export default function TaskListScreen({
   useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: () => <ZoneLogo colors={colors} />,
+      headerTitleAlign: 'center',
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => navigation.navigate('About')}
+          activeOpacity={0.7}
+          accessibilityLabel="About Zone"
+          accessibilityRole="button"
+          accessibilityHint="Opens app info and features"
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 12,
+            backgroundColor: colors.surfaceVariant,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginLeft: 8,
+          }}
+        >
+          <Icon source="information-outline" size={24} color={colors.textSecondary} />
+        </TouchableOpacity>
+      ),
       headerRight: () => (
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+        <View style={{ marginRight: 8 }}>
           <ThemeToggle theme={theme} toggleTheme={toggleTheme} colors={colors} />
-          <IconButton
-            icon="information-outline"
-            size={22}
-            iconColor={colors.textMuted}
-            onPress={() => navigation.navigate('About')}
-            style={{ margin: 0 }}
-          />
         </View>
       ),
     });

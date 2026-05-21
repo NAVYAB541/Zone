@@ -11,13 +11,13 @@ const FEATURES = [
     icon: 'creation',
     color: '#818cf8',
     title: 'AI Planning',
-    desc: 'Drop in any task and our AI quietly breaks it into 4–7 focused steps — with time estimates, energy levels, and a clear first action.',
+    desc: 'Drop in any task and our AI quietly breaks it into 4 to 7 focused steps, complete with time estimates, energy levels, and a clear first action.',
   },
   {
     icon: 'lightning-bolt',
     color: '#f59e0b',
     title: 'Energy Matching',
-    desc: 'Launch Me reads your energy — high, medium, or low — and surfaces the right task for right now. No decision fatigue.',
+    desc: 'Launch Me reads your energy level (high, medium, or low) and surfaces the right task for right now. No decision fatigue.',
   },
   {
     icon: 'timer-outline',
@@ -65,7 +65,7 @@ export default function AboutScreen() {
           <Text style={styles.aboutEmphasis}>you don't have to climb it all at once.</Text>
         </Text>
         <Text style={styles.aboutText}>
-          We break your biggest, most daunting tasks into small steps — matched to your energy and the time you actually have. Then we help you lock in with focused sessions that feel manageable, not exhausting.
+          We break your biggest, most daunting tasks into small steps, matched to your energy and the time you actually have. Then we help you lock in with focused sessions that feel manageable, not exhausting.
         </Text>
         <Text style={styles.aboutText}>
           You don't need more willpower. You just need a clearer path.{' '}
