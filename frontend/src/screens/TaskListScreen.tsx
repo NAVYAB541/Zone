@@ -9,6 +9,7 @@ import {
   ScrollView,
   Animated,
 } from 'react-native';
+import Svg, { Circle, Defs, RadialGradient, Stop, Filter, FeGaussianBlur, FeMerge, FeMergeNode } from 'react-native-svg';
 import {
   Chip,
   Button,
@@ -39,6 +40,39 @@ function priorityColor(p?: string) {
   if (p === 'high') return COLORS.danger;
   if (p === 'medium') return COLORS.primary;
   return COLORS.secondary;
+}
+
+function ZoneLogo({ colors }: { colors: AppColors }) {
+  const isDark = colors.background === '#0f0f0f';
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+      <Svg width={28} height={28} viewBox="0 0 120 120">
+        <Defs>
+          <RadialGradient id="zbg" cx="50%" cy="35%" r="70%">
+            <Stop offset="0%" stopColor="#1e1b4b" />
+            <Stop offset="100%" stopColor="#0f0f0f" />
+          </RadialGradient>
+          <Filter id="zglow">
+            <FeGaussianBlur stdDeviation="2.5" result="blur" />
+            <FeMerge>
+              <FeMergeNode in="blur" />
+              <FeMergeNode in="SourceGraphic" />
+            </FeMerge>
+          </Filter>
+        </Defs>
+        <Circle cx="60" cy="60" r="60" fill="url(#zbg)" />
+        <Circle cx="60" cy="60" r="40" fill="#4f46e5" fillOpacity={0.06} />
+        <Circle cx="60" cy="60" r="50" fill="none" stroke="#4f46e5" strokeOpacity={0.25} strokeWidth={4.5} />
+        <Circle cx="60" cy="60" r="36" fill="none" stroke="#6366f1" strokeOpacity={0.55} strokeWidth={5} />
+        <Circle cx="60" cy="60" r="22" fill="none" stroke="#818cf8" strokeWidth={5.5} />
+        <Circle cx="60" cy="60" r="7" fill="#818cf8" />
+        <Circle cx="60" cy="60" r="4" fill="white" fillOpacity={0.95} />
+      </Svg>
+      <Text style={{ fontSize: 20, fontWeight: '800', color: colors.primary, letterSpacing: -0.5 }}>
+        Zone
+      </Text>
+    </View>
+  );
 }
 
 function ThemeToggle({ theme, toggleTheme, colors }: { theme: string; toggleTheme: () => void; colors: AppColors }) {
@@ -121,6 +155,7 @@ export default function TaskListScreen({
 
   useLayoutEffect(() => {
     navigation.setOptions({
+      headerTitle: () => <ZoneLogo colors={colors} />,
       headerRight: () => (
         <ThemeToggle theme={theme} toggleTheme={toggleTheme} colors={colors} />
       ),
