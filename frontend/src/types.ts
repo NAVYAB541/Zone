@@ -41,4 +41,5 @@ export type RootStackParamList = {
     dueDate: string | null;
     existingTaskId?: string;
   };
+  About: undefined;
 };

@@ -147,7 +147,16 @@ export default function TaskListScreen({
     navigation.setOptions({
       headerTitle: () => <ZoneLogo colors={colors} />,
       headerRight: () => (
-        <ThemeToggle theme={theme} toggleTheme={toggleTheme} colors={colors} />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <ThemeToggle theme={theme} toggleTheme={toggleTheme} colors={colors} />
+          <IconButton
+            icon="information-outline"
+            size={22}
+            iconColor={colors.textMuted}
+            onPress={() => navigation.navigate('About')}
+            style={{ margin: 0 }}
+          />
+        </View>
       ),
     });
   }, [theme, colors]);
