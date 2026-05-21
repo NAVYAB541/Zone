@@ -41,15 +41,27 @@ function priorityColor(p?: string) {
   return COLORS.secondary;
 }
 
-function ZoneLogo({ colors }: { colors: AppColors }) {
+function ZoneLogo({ colors, theme }: { colors: AppColors; theme: string }) {
+  // Light mode: dark badge exactly like the app icon
+  // Dark mode: subtle indigo-tinted surface so it reads as contained without clashing
+  const badgeBg    = theme === 'dark' ? 'rgba(99,102,241,0.15)' : '#1e1b4b';
+  const ringColor  = theme === 'dark' ? colors.primary : '#a5b4fc';
+  const dotColor   = theme === 'dark' ? colors.primary : '#c4b5fd';
+
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
-      <Svg width={26} height={26} viewBox="0 0 120 120">
-        <Circle cx="60" cy="60" r="50" fill="none" stroke={colors.primary} strokeOpacity={0.2} strokeWidth={7} />
-        <Circle cx="60" cy="60" r="36" fill="none" stroke={colors.primary} strokeOpacity={0.5} strokeWidth={7} />
-        <Circle cx="60" cy="60" r="22" fill="none" stroke={colors.primary} strokeWidth={7} />
-        <Circle cx="60" cy="60" r="7" fill={colors.primary} />
-      </Svg>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+      <View style={{
+        width: 32, height: 32, borderRadius: 10,
+        backgroundColor: badgeBg,
+        alignItems: 'center', justifyContent: 'center',
+      }}>
+        <Svg width={20} height={20} viewBox="0 0 120 120">
+          <Circle cx="60" cy="60" r="50" fill="none" stroke={ringColor} strokeOpacity={0.3} strokeWidth={10} />
+          <Circle cx="60" cy="60" r="36" fill="none" stroke={ringColor} strokeOpacity={0.6} strokeWidth={10} />
+          <Circle cx="60" cy="60" r="22" fill="none" stroke={ringColor} strokeWidth={10} />
+          <Circle cx="60" cy="60" r="7"  fill={dotColor} />
+        </Svg>
+      </View>
       <Text style={{ fontSize: 19, fontWeight: '800', color: colors.primary, letterSpacing: -0.4 }}>
         Zone
       </Text>
@@ -89,7 +101,7 @@ const SORT_OPTIONS: { label: string; value: 'priority' | 'dueDate' | 'title'; ic
 export default function TaskListScreen({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, 'TaskList'>) {
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -106,33 +118,35 @@ export default function TaskListScreen({
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerTitle: () => <ZoneLogo colors={colors} />,
+      headerTitle: () => <ZoneLogo colors={colors} theme={theme} />,
       headerTitleAlign: 'center',
       headerLeft: () => (
-        <IconButton
-          icon="information-outline"
-          size={24}
-          iconColor={colors.textSecondary}
+        <TouchableOpacity
           onPress={() => navigation.navigate('About')}
-          style={{ marginLeft: 4 }}
+          activeOpacity={0.6}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           accessibilityLabel="About Zone"
           accessibilityRole="button"
           accessibilityHint="Opens app info and features"
-        />
+          style={{ marginLeft: 14 }}
+        >
+          <Icon source="information-outline" size={24} color={colors.textSecondary} />
+        </TouchableOpacity>
       ),
       headerRight: () => (
-        <IconButton
-          icon="cog-outline"
-          size={24}
-          iconColor={colors.textSecondary}
+        <TouchableOpacity
           onPress={() => navigation.navigate('Settings')}
-          style={{ marginRight: 4 }}
+          activeOpacity={0.6}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           accessibilityLabel="Settings"
           accessibilityRole="button"
-        />
+          style={{ marginRight: 14 }}
+        >
+          <Icon source="cog-outline" size={24} color={colors.textSecondary} />
+        </TouchableOpacity>
       ),
     });
-  }, [colors]);
+  }, [theme, colors]);
 
   const toggleExpanded = (id: string) => {
     setExpandedTasks(prev => {

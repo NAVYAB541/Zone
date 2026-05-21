@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useEffect, useMemo } from 'react';
+import { NavigationContainer, DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Provider as PaperProvider } from 'react-native-paper';
 import TaskListScreen from './src/screens/TaskListScreen';
@@ -18,20 +18,33 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 // Inner component so it can read from ThemeContext before passing to PaperProvider
 function ThemedApp() {
-  const { paperTheme, colors } = useTheme();
+  const { paperTheme, colors, theme } = useTheme();
 
   useEffect(() => {
     requestNotificationPermission();
   }, []);
 
+  // Pass our custom colors to NavigationContainer so transitions never flash white
+  const navTheme = useMemo(() => ({
+    ...(theme === 'dark' ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(theme === 'dark' ? DarkTheme.colors : DefaultTheme.colors),
+      background: colors.background,
+      card:       colors.surface,
+      text:       colors.text,
+      border:     colors.border,
+    },
+  }), [theme, colors]);
+
   return (
     <PaperProvider theme={paperTheme}>
-      <NavigationContainer>
+      <NavigationContainer theme={navTheme}>
         <Stack.Navigator
           screenOptions={{
             headerStyle: { backgroundColor: colors.surface },
             headerTintColor: colors.text,
             headerShadowVisible: false,
+            contentStyle: { backgroundColor: colors.background },
           }}
         >
           <Stack.Screen name="TaskList"    component={TaskListScreen}    options={{ title: 'Tasks' }} />
