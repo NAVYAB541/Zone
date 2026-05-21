@@ -1,6 +1,8 @@
-# TaskManager — Cross-Platform Mobile App
+# Zone — Less overwhelm. More momentum.
 
 A full-stack mobile productivity app built with **React Native** and **TypeScript**, backed by a **Node.js/Express** REST API with a persistent **MongoDB Atlas** database. Deployed on **Render** and runs on both iOS and Android via Expo.
+
+Zone breaks big, scary tasks into manageable steps using AI, matches tasks to your energy level, and tracks your focus sessions — so you always know exactly what to do next.
 
 ---
 
@@ -141,7 +143,7 @@ Base URL: `https://taskmanager-pn0w.onrender.com`
 ## Project Structure
 
 ```
-TaskManager/
+Zone/
 ├── backend/
 │   ├── server.js          # Express app, Mongoose models, all routes, AI endpoint
 │   ├── .env               # Local env vars (gitignored)

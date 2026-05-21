@@ -1,0 +1,19 @@
+# Claude Code
+.claude/
+
+# Branding / dev previews
+brand/
+zone-brand.html
+
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env*.local
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
