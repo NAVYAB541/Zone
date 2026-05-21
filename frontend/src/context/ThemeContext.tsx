@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { Appearance } from 'react-native';
+import { Appearance, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
 
@@ -73,17 +73,20 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+// Best-guess background while AsyncStorage loads (~20–50 ms)
+const systemTheme: ThemeType = Appearance.getColorScheme() === 'dark' ? 'dark' : 'light';
+const LOADING_BG = systemTheme === 'dark' ? '#0f0f0f' : '#f7f8fc';
+
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize from device color scheme synchronously so first render is correct.
-  // AsyncStorage then overrides with the user's explicit saved preference.
-  const [theme, setTheme] = useState<ThemeType>(
-    () => Appearance.getColorScheme() === 'dark' ? 'dark' : 'light'
-  );
+  const [theme, setTheme] = useState<ThemeType>(systemTheme);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(THEME_KEY).then(saved => {
-      if (saved === 'dark' || saved === 'light') setTheme(saved);
-    });
+    AsyncStorage.getItem(THEME_KEY)
+      .then(saved => {
+        if (saved === 'dark' || saved === 'light') setTheme(saved);
+      })
+      .finally(() => setReady(true));
   }, []);
 
   const toggleTheme = () => {
@@ -101,6 +104,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const colors      = theme === 'light' ? lightColors : darkColors;
   const paperTheme  = theme === 'light' ? lightPaperTheme : darkPaperTheme;
+
+  // Hold rendering until saved preference is confirmed — prevents light-flash
+  if (!ready) {
+    return <View style={{ flex: 1, backgroundColor: LOADING_BG }} />;
+  }
 
   return (
     <ThemeContext.Provider value={{ theme, colors, paperTheme, toggleTheme, setTheme: applyTheme }}>

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { NavigationContainer, DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Provider as PaperProvider } from 'react-native-paper';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import TaskListScreen from './src/screens/TaskListScreen';
 import AddTaskScreen from './src/screens/AddTaskScreen';
 import TaskDetailsScreen from './src/screens/TaskDetailsScreen';
@@ -16,7 +17,6 @@ import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-// Inner component so it can read from ThemeContext before passing to PaperProvider
 function ThemedApp() {
   const { paperTheme, colors, theme } = useTheme();
 
@@ -24,7 +24,6 @@ function ThemedApp() {
     requestNotificationPermission();
   }, []);
 
-  // Pass our custom colors to NavigationContainer so transitions never flash white
   const navTheme = useMemo(() => ({
     ...(theme === 'dark' ? DarkTheme : DefaultTheme),
     colors: {
@@ -47,7 +46,8 @@ function ThemedApp() {
             contentStyle: { backgroundColor: colors.background },
           }}
         >
-          <Stack.Screen name="TaskList"    component={TaskListScreen}    options={{ title: 'Tasks' }} />
+          {/* TaskList uses a fully custom header — no native bar, no iOS button pills */}
+          <Stack.Screen name="TaskList"    component={TaskListScreen}    options={{ headerShown: false }} />
           <Stack.Screen name="AddTask"     component={AddTaskScreen}     options={{ title: 'Add Task' }} />
           <Stack.Screen name="TaskDetails" component={TaskDetailsScreen} options={{ title: 'Task Details' }} />
           <Stack.Screen name="LaunchMe"    component={LaunchMeScreen}    options={{ title: 'Launch Me' }} />
@@ -63,8 +63,10 @@ function ThemedApp() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <ThemedApp />
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <ThemedApp />
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }

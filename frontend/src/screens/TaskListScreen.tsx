@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useLayoutEffect } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   ScrollView,
 } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Chip,
   Button,
@@ -103,6 +104,7 @@ export default function TaskListScreen({
 }: NativeStackScreenProps<RootStackParamList, 'TaskList'>) {
   const { colors, theme } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const insets = useSafeAreaInsets();
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [allTopLevel, setAllTopLevel] = useState<Task[]>([]);
@@ -115,38 +117,6 @@ export default function TaskListScreen({
   const [sortMenuVisible, setSortMenuVisible] = useState(false);
   const [subtasksByParent, setSubtasksByParent] = useState<Record<string, Task[]>>({});
   const [expandedTasks, setExpandedTasks] = useState<Set<string>>(new Set());
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerTitle: () => <ZoneLogo colors={colors} theme={theme} />,
-      headerTitleAlign: 'center',
-      headerLeft: () => (
-        <TouchableOpacity
-          onPress={() => navigation.navigate('About')}
-          activeOpacity={0.5}
-          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-          accessibilityLabel="About Zone"
-          accessibilityRole="button"
-          accessibilityHint="Opens app info and features"
-          style={{ marginLeft: 14, backgroundColor: 'transparent' }}
-        >
-          <Icon source="information-outline" size={24} color={colors.textSecondary} />
-        </TouchableOpacity>
-      ),
-      headerRight: () => (
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Settings')}
-          activeOpacity={0.5}
-          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-          accessibilityLabel="Settings"
-          accessibilityRole="button"
-          style={{ marginRight: 14, backgroundColor: 'transparent' }}
-        >
-          <Icon source="cog-outline" size={24} color={colors.textSecondary} />
-        </TouchableOpacity>
-      ),
-    });
-  }, [theme, colors]);
 
   const toggleExpanded = (id: string) => {
     setExpandedTasks(prev => {
@@ -401,8 +371,39 @@ export default function TaskListScreen({
   const currentSort = SORT_OPTIONS.find(o => o.value === sortBy)!;
 
   return (
-    <View style={styles.container}>
-      <ProductivityBadge score={productivityScore} colors={colors} />
+    <View style={styles.screenWrap}>
+      {/* ── Custom header (replaces native bar so iOS adds no button pills) ── */}
+      <View style={[styles.header, { paddingTop: insets.top }]}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('About')}
+          activeOpacity={0.5}
+          hitSlop={10}
+          accessibilityLabel="About Zone"
+          accessibilityRole="button"
+          style={styles.headerBtn}
+        >
+          <Icon source="information-outline" size={22} color={colors.textSecondary} />
+        </TouchableOpacity>
+
+        <View style={styles.headerCenter}>
+          <ZoneLogo colors={colors} theme={theme} />
+        </View>
+
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Settings')}
+          activeOpacity={0.5}
+          hitSlop={10}
+          accessibilityLabel="Settings"
+          accessibilityRole="button"
+          style={styles.headerBtn}
+        >
+          <Icon source="cog-outline" size={22} color={colors.textSecondary} />
+        </TouchableOpacity>
+      </View>
+
+      {/* ── Screen content ── */}
+      <View style={styles.container}>
+        <ProductivityBadge score={productivityScore} colors={colors} />
 
       {/* ── Filters ── */}
       <View style={styles.filterSection}>
@@ -534,12 +535,34 @@ export default function TaskListScreen({
           showsVerticalScrollIndicator={false}
         />
       )}
+      </View>
     </View>
   );
 }
 
 function makeStyles(colors: AppColors) {
   return StyleSheet.create({
+    screenWrap: { flex: 1, backgroundColor: colors.background },
+
+    // Custom header
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      paddingHorizontal: 8,
+      paddingBottom: 12,
+    },
+    headerBtn: {
+      width: 44,
+      height: 44,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    headerCenter: {
+      flex: 1,
+      alignItems: 'center',
+    },
+
     container: { flex: 1, padding: 16, backgroundColor: colors.background },
 
     // Productivity card
