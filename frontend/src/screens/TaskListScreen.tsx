@@ -573,17 +573,27 @@ export default function TaskListScreen({
         Launch Me
       </Button>
 
-      {/* ── Add Task ── */}
-      <Button
-        mode="contained"
-        icon="plus"
-        onPress={() => navigation.navigate('AddTask')}
-        style={styles.addButton}
-        contentStyle={styles.addButtonContent}
-        buttonColor={colors.primary}
-      >
-        Add Task
-      </Button>
+      {/* ── Add Task / AI Planner ── */}
+      <Surface style={styles.addCard} elevation={1}>
+        <TouchableOpacity
+          style={styles.addMain}
+          onPress={() => navigation.navigate('AddTask')}
+          activeOpacity={0.7}
+        >
+          <Icon source="plus-circle-outline" size={18} color="#fff" />
+          <Text style={styles.addMainText}>Add Task</Text>
+        </TouchableOpacity>
+        <View style={styles.addDivider} />
+        <TouchableOpacity
+          style={styles.addAIRow}
+          onPress={() => navigation.navigate('AddTask')}
+          activeOpacity={0.7}
+        >
+          <Icon source="auto-fix" size={14} color={colors.primary} />
+          <Text style={styles.addAIText}>Plan with AI inside: break any task into steps</Text>
+          <Icon source="chevron-right" size={14} color={colors.textDisabled} />
+        </TouchableOpacity>
+      </Surface>
 
       {/* ── Task list ── */}
       {loading ? (
@@ -658,9 +668,42 @@ function makeStyles(colors: AppColors) {
     launchButton: { borderRadius: 12, marginBottom: 10 },
     launchButtonContent: { paddingVertical: 4 },
 
-    // Add button
-    addButton: { borderRadius: 12, marginBottom: 14 },
-    addButtonContent: { paddingVertical: 4 },
+    // Add Task / AI hint card
+    addCard: {
+      borderRadius: 12,
+      marginBottom: 14,
+      backgroundColor: colors.surface,
+      overflow: 'hidden',
+    },
+    addMain: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      backgroundColor: colors.primary,
+      paddingVertical: 12,
+    },
+    addMainText: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: '#fff',
+    },
+    addDivider: {
+      height: 1,
+      backgroundColor: colors.borderLight,
+    },
+    addAIRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 7,
+      paddingHorizontal: 14,
+      paddingVertical: 9,
+    },
+    addAIText: {
+      flex: 1,
+      fontSize: 12,
+      color: colors.textSecondary,
+    },
 
     // Task card
     task: {
