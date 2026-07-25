@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { Surface, SegmentedButtons } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme, AppColors, ThemeType } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 type EnergyLevel = 'high' | 'medium' | 'low';
 type EnergyPrefs = {
@@ -22,6 +23,7 @@ const ENERGY_SLOTS = [
 
 export default function SettingsScreen() {
   const { colors, theme, setTheme } = useTheme();
+  const { logout, user } = useAuth();
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const [prefs, setPrefs] = useState<EnergyPrefs>(DEFAULT_PREFS);
@@ -90,6 +92,27 @@ export default function SettingsScreen() {
             {i < ENERGY_SLOTS.length - 1 && <View style={styles.divider} />}
           </View>
         ))}
+      </Surface>
+
+      {/* ── Account ── */}
+      <Text style={[styles.sectionLabel, { marginTop: 32 }]}>Account</Text>
+      <Surface style={styles.card} elevation={1}>
+        {!!user?.email && (
+          <Text style={[styles.rowTitle, { marginBottom: 4 }]}>{user.email}</Text>
+        )}
+        <Text style={styles.rowSub}>Signed in to Zone</Text>
+        <TouchableOpacity
+          style={[styles.signOutBtn, { borderColor: colors.danger }]}
+          onPress={() =>
+            Alert.alert('Sign out', 'Are you sure you want to sign out?', [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Sign out', style: 'destructive', onPress: logout },
+            ])
+          }
+          activeOpacity={0.75}
+        >
+          <Text style={[styles.signOutText, { color: colors.danger }]}>Sign out</Text>
+        </TouchableOpacity>
       </Surface>
 
       {/* ── Footer spacer ── */}
@@ -170,6 +193,17 @@ function makeStyles(colors: AppColors) {
       height: 1,
       backgroundColor: colors.borderLight,
       marginVertical: 18,
+    },
+    signOutBtn: {
+      marginTop: 12,
+      borderWidth: 1,
+      borderRadius: 10,
+      paddingVertical: 12,
+      alignItems: 'center',
+    },
+    signOutText: {
+      fontSize: 15,
+      fontWeight: '600',
     },
   });
 }
