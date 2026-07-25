@@ -16,6 +16,7 @@ import { RootStackParamList, Task } from '../types';
 import { COLORS } from '../constants/Theme';
 import dayjs from 'dayjs';
 import { useTheme, AppColors } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 const API_URL = 'https://taskmanager-pn0w.onrender.com/tasks';
 const TIME_WINDOWS = [15, 30, 60, 90, 120] as const;
@@ -63,6 +64,7 @@ type LaunchItem = {
 
 export default function LaunchMeScreen({ navigation }: Props) {
   const { colors } = useTheme();
+  const { authFetch } = useAuth();
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const [window, setWindow]       = useState<TimeWindow>(30);
@@ -94,7 +96,7 @@ export default function LaunchMeScreen({ navigation }: Props) {
     try {
       setLoading(true);
       const currentPrefs = await loadPrefs();
-      const res = await fetch(`${API_URL}?completed=false`);
+      const res = await authFetch(`${API_URL}?completed=false`);
       const all: Task[] = await res.json();
 
       // Separate top-level tasks and subtasks

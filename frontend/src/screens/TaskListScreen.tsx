@@ -27,6 +27,7 @@ import { COLORS } from '../constants/Theme';
 import dayjs from 'dayjs';
 import { cancelTaskReminder } from '../utils/notifications';
 import { useTheme, AppColors } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 const API_URL = 'https://taskmanager-pn0w.onrender.com/tasks';
 
@@ -103,6 +104,7 @@ export default function TaskListScreen({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, 'TaskList'>) {
   const { colors, theme } = useTheme();
+  const { authFetch } = useAuth();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
 
@@ -149,7 +151,7 @@ export default function TaskListScreen({
   const loadTasks = async () => {
     try {
       setLoading(true);
-      const res = await fetch(API_URL);
+      const res = await authFetch(API_URL);
       const all: Task[] = await res.json();
 
       // Collect tags from top-level tasks only
@@ -204,14 +206,14 @@ export default function TaskListScreen({
       const incomplete = subs.filter(s => !s.completed);
       await Promise.all(
         incomplete.map(s =>
-          fetch(`${API_URL}/${s.id}`, {
+          authFetch(`${API_URL}/${s.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ...s, completed: true }),
           })
         )
       );
-      await fetch(`${API_URL}/${parent.id}`, {
+      await authFetch(`${API_URL}/${parent.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...parent, completed: true }),
@@ -239,7 +241,7 @@ export default function TaskListScreen({
 
     try {
       const newCompleted = !task.completed;
-      await fetch(`${API_URL}/${task.id}`, {
+      await authFetch(`${API_URL}/${task.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...task, completed: newCompleted }),
@@ -254,7 +256,7 @@ export default function TaskListScreen({
             const siblings = subtasksByParent[task.parentTaskId] ?? [];
             const allWillBeDone = siblings.every(s => s.id === task.id || s.completed);
             if (allWillBeDone && !parent.completed) {
-              await fetch(`${API_URL}/${parent.id}`, {
+              await authFetch(`${API_URL}/${parent.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...parent, completed: true }),
@@ -263,7 +265,7 @@ export default function TaskListScreen({
           } else {
             // Un-completed a subtask — if parent was complete, un-complete it too
             if (parent.completed) {
-              await fetch(`${API_URL}/${parent.id}`, {
+              await authFetch(`${API_URL}/${parent.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...parent, completed: false }),
@@ -285,7 +287,7 @@ export default function TaskListScreen({
         onPress: async () => {
           try {
             await cancelTaskReminder(task.id);
-            await fetch(`${API_URL}/${task.id}`, { method: 'DELETE' });
+            await authFetch(`${API_URL}/${task.id}`, { method: 'DELETE' });
             loadTasks();
           } catch { Alert.alert('Error', 'Could not delete task'); }
         },

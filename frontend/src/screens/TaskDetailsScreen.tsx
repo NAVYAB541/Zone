@@ -9,6 +9,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import dayjs from 'dayjs';
 import { cancelTaskReminder, scheduleTaskReminder } from '../utils/notifications';
 import { useTheme, AppColors } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TaskDetails'>;
 const API_URL = 'https://taskmanager-pn0w.onrender.com/tasks';
@@ -18,6 +19,7 @@ type SubtaskDraft = { title: string; description: string; estimateMinutes: strin
 export default function TaskDetailsScreen({ navigation, route }: Props) {
   const { task } = route.params;
   const { colors } = useTheme();
+  const { authFetch } = useAuth();
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const [title, setTitle]               = useState(task.title);
@@ -43,7 +45,7 @@ export default function TaskDetailsScreen({ navigation, route }: Props) {
 
   useEffect(() => {
     // Load subtasks for this task
-    fetch(`${API_URL}?parentTaskId=${task.id}`)
+    authFetch(`${API_URL}?parentTaskId=${task.id}`)
       .then(r => r.json())
       .then((data: Task[]) => {
         const sorted = [...data].sort((a, b) =>
@@ -57,7 +59,7 @@ export default function TaskDetailsScreen({ navigation, route }: Props) {
   const addSubtask = async () => {
     if (!newSubTitle.trim()) return;
     try {
-      const res = await fetch(API_URL, {
+      const res = await authFetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -83,7 +85,7 @@ export default function TaskDetailsScreen({ navigation, route }: Props) {
 
   const toggleSubtask = async (sub: Task) => {
     try {
-      await fetch(`${API_URL}/${sub.id}`, {
+      await authFetch(`${API_URL}/${sub.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ completed: !sub.completed }),
@@ -94,7 +96,7 @@ export default function TaskDetailsScreen({ navigation, route }: Props) {
 
   const deleteSubtask = async (sub: Task) => {
     try {
-      await fetch(`${API_URL}/${sub.id}`, { method: 'DELETE' });
+      await authFetch(`${API_URL}/${sub.id}`, { method: 'DELETE' });
       setSubtasks(prev => prev.filter(s => s.id !== sub.id));
     } catch {}
   };
@@ -104,7 +106,7 @@ export default function TaskDetailsScreen({ navigation, route }: Props) {
     const parsedTags = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
     try {
       setSaving(true);
-      await fetch(`${API_URL}/${task.id}`, {
+      await authFetch(`${API_URL}/${task.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

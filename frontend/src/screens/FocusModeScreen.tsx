@@ -8,6 +8,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';
 import { COLORS } from '../constants/Theme';
 import { useTheme, AppColors } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 const API_URL = 'https://taskmanager-pn0w.onrender.com/tasks';
 type Props = NativeStackScreenProps<RootStackParamList, 'FocusMode'>;
@@ -29,6 +30,7 @@ const RATINGS: { value: FeelingRating; icon: string; label: string; color: strin
 export default function FocusModeScreen({ navigation, route }: Props) {
   const { task } = route.params;
   const { colors } = useTheme();
+  const { authFetch } = useAuth();
   const modalStyles = useMemo(() => makeModalStyles(colors), [colors]);
 
   const [seconds, setSeconds] = useState(0);
@@ -73,7 +75,7 @@ export default function FocusModeScreen({ navigation, route }: Props) {
     setModalStep(null);
     try {
       const actualMinutes = Math.max(1, Math.round(seconds / 60));
-      await fetch(`${API_URL}/${task.id}/complete-focus`, {
+      await authFetch(`${API_URL}/${task.id}/complete-focus`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ actualMinutes, feelingRating }),
@@ -84,7 +86,7 @@ export default function FocusModeScreen({ navigation, route }: Props) {
         updates.nextAction = nextActionDraft.trim();
       }
       if (Object.keys(updates).length) {
-        await fetch(`${API_URL}/${task.id}`, {
+        await authFetch(`${API_URL}/${task.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(updates),

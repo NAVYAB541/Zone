@@ -22,6 +22,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import dayjs from 'dayjs';
 import { useTheme, AppColors } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AddTask'>;
 const API_URL = 'https://taskmanager-pn0w.onrender.com/tasks';
@@ -37,6 +38,7 @@ function inferEnergyFromTime(): 'high' | 'medium' | 'low' {
 
 export default function AddTaskScreen({ navigation }: Props) {
   const { colors } = useTheme();
+  const { authFetch } = useAuth();
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const [title, setTitle]               = useState('');
@@ -83,7 +85,7 @@ export default function AddTaskScreen({ navigation }: Props) {
 
     try {
       setSaving(true);
-      const res = await fetch(API_URL, {
+      const res = await authFetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -102,7 +104,7 @@ export default function AddTaskScreen({ navigation }: Props) {
       const newTask = await res.json();
 
       if (subtaskDrafts.length > 0) {
-        await fetch(`${API_URL.replace('/tasks', '')}/tasks/bulk`, {
+        await authFetch(`${API_URL.replace('/tasks', '')}/tasks/bulk`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

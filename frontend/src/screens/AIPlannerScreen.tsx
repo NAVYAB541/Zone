@@ -22,6 +22,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import { useTheme, AppColors } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 const BASE_URL = 'https://taskmanager-pn0w.onrender.com';
 type Props = NativeStackScreenProps<RootStackParamList, 'AIPlanner'>;
@@ -42,6 +43,7 @@ const ENERGY_COLOR = {
 export default function AIPlannerScreen({ navigation, route }: Props) {
   const { title, description: initialDesc, category, priority, dueDate, existingTaskId } = route.params;
   const { colors } = useTheme();
+  const { authFetch } = useAuth();
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const [description, setDescription] = useState(initialDesc);
@@ -103,7 +105,7 @@ export default function AIPlannerScreen({ navigation, route }: Props) {
     setLoading(true);
     setResult(null);
     try {
-      const res = await fetch(`${BASE_URL}/ai/plan-task`, {
+      const res = await authFetch(`${BASE_URL}/ai/plan-task`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -129,7 +131,7 @@ export default function AIPlannerScreen({ navigation, route }: Props) {
   const saveAll = async () => {
     // If there's an existing task, check if it already has subtasks
     if (existingTaskId) {
-      const res = await fetch(`${BASE_URL}/tasks?parentTaskId=${existingTaskId}`);
+      const res = await authFetch(`${BASE_URL}/tasks?parentTaskId=${existingTaskId}`);
       const existing: { id: string }[] = await res.json();
       if (existing.length > 0) {
         await new Promise<void>((resolve, reject) => {
@@ -146,7 +148,7 @@ export default function AIPlannerScreen({ navigation, route }: Props) {
                 text: 'Replace all',
                 style: 'destructive',
                 onPress: async () => {
-                  await Promise.all(existing.map(t => fetch(`${BASE_URL}/tasks/${t.id}`, { method: 'DELETE' })));
+                  await Promise.all(existing.map(t => authFetch(`${BASE_URL}/tasks/${t.id}`, { method: 'DELETE' })));
                   resolve();
                 },
               },
@@ -162,7 +164,7 @@ export default function AIPlannerScreen({ navigation, route }: Props) {
 
       if (!parentId) {
         // Create the parent task only if we don't have an existing one
-        const parentRes = await fetch(`${BASE_URL}/tasks`, {
+        const parentRes = await authFetch(`${BASE_URL}/tasks`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -179,7 +181,7 @@ export default function AIPlannerScreen({ navigation, route }: Props) {
       }
 
       // Bulk-create subtasks linked to parent
-      await fetch(`${BASE_URL}/tasks/bulk`, {
+      await authFetch(`${BASE_URL}/tasks/bulk`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
