@@ -27,6 +27,12 @@ export type AIPlanResult = {
   subtasks: AISubtask[];
 };
 
+export type AuthStackParamList = {
+  Welcome: undefined;
+  Login:   undefined;
+  SignUp:  undefined;
+};
+
 export type RootStackParamList = {
   TaskList: undefined;
   AddTask: undefined;
